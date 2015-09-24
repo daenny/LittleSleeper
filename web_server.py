@@ -1,4 +1,5 @@
 import os
+import json
 from datetime import datetime
 
 import tornado.httpserver
@@ -27,11 +28,18 @@ MIN_QUIET_TIME = 30
 # seconds of noise before transition mode from "quiet" to "noise"
 MIN_NOISE_TIME = 5
 
+clients = []
+
+class JsonHandler(tornado.web.RequestHandler):
+    def get(self):
+        results = retrieve_mic_data()
+        self.write(json.dumps(results))
+
+
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
         self.render('index.html')
 
-clients = []
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def open(self):
@@ -43,7 +51,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         clients.remove(self)
 
 
-def broadcast_mic_data():
+def retrieve_mic_data():
     # get the latest data from the audio server
     parameters = {"upper_limit": UPPER_LIMIT,
                   "noise_threshold": NOISE_THRESHOLD,
@@ -59,6 +67,11 @@ def broadcast_mic_data():
     results['date_current'] = '{dt:%A} {dt:%B} {dt.day}, {dt.year}'.format(dt=now)
     results['time_current'] = now.strftime("%I:%M:%S %p").lstrip('0')
     results['audio_plot'] = results['audio_plot'].tolist()
+    return results
+
+
+def broadcast_mic_data():
+    results = retrieve_mic_data()
     for c in clients:
         c.write_message(results)
 
@@ -70,13 +83,14 @@ def main():
     app = tornado.web.Application(
         handlers=[
             (r"/", IndexHandler),
+            (r"/json", JsonHandler),
             (r"/ws", WebSocketHandler),
         ], **settings
     )
     http_server = tornado.httpserver.HTTPServer(app)
     http_server.listen(HTTP_PORT)
     print "Listening on port:", HTTP_PORT
- 
+
     main_loop = tornado.ioloop.IOLoop.instance()
     scheduler = tornado.ioloop.PeriodicCallback(broadcast_mic_data, 1000, io_loop=main_loop)
     scheduler.start()
