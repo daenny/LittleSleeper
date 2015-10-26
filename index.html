@@ -5,8 +5,6 @@
         <title>LittleSleeper</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
         <link rel="stylesheet" href={{ static_url("custom.css") }}>
-
-
     </head>
     <body>
     <div class="container">
@@ -27,8 +25,8 @@
 
         <!-- scrolling volume plot -->
         <div class="plot-container">
-			<div id="plot" class="plot-placeholder"></div>
-		</div>
+            <div id="plot" class="plot-placeholder"></div>
+        </div>
 
         <!-- history -->
         <table class="table table-hover" id="history_table">
@@ -45,7 +43,7 @@
         var plot = $.plot("#plot", [ zeros ], {
             series: {
                 color: "#000",
-                shadowSize: 0,	// Drawing is faster without shadows
+                shadowSize: 0,    // Drawing is faster without shadows
                 lines: {
                     lineWidth: 2
                 }
@@ -80,10 +78,10 @@
             // update the plot of the volume levels for the past hour
             var data = JSON.parse(message.data).audio_plot;
             var vals = [];
-			for (var i = 0; i < data.length; i++) { vals.push([i, data[i]]); }
-            plot.setData([ vals ]);
-            plot.draw();
-        };
+            for (var i = 0; i < data.length; i++) { vals.push([i, data[i]]); }
+                plot.setData([ vals ]);
+                plot.draw();
+            };
     });
     </script>
 
