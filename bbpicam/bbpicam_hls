@@ -1,0 +1,41 @@
+#!/bin/sh
+#PATH=/sbin:/usr/sbin:/bin:/usr/bin
+
+sleep 0 #was 10
+
+base="/usr/share/nginx/www"
+set -x
+
+FIFO=live.h264
+
+rm -rf live live.h264 "$base/live"
+mkdir -p live
+ln -s "$PWD/live" "$base/live"
+
+#raspivid -w 1280 -h 960 -fps 24 -g 24 -t 0 -b 600000 -o - | LD_LIBRARY_PATH=/usr/local/lib ffmpeg -fflags +nobuffer -re -i - -fflags +nobuffer -re -f alsa -ar 16000 -ac 2 -i hw:1,0 -map 0:0 -map 1:0 -c:v copy -strict -2 -c:a aac -b:a 16k -ac 1 -af "pan=1c|c0=c1" -f rtsp -metadata title=bbPiCam rtsp://0.0.0.0:554
+
+mkfifo $FIFO
+#raspivid -w 1280 -h 960 -fps 24 -g 24 -t 0 -b 600000 -o $FIFO &
+raspivid -w 1280 -h 720 -fps 25 -hf -t 0 -b 1800000 -o - | psips > $FIFO &
+
+#export LD_LIBRARY_PATH=/usr/local/lib
+sleep 2 #was nothign?
+#exec ffmpeg -fflags +nobuffer -re -i $FIFO -fflags +nobuffer -re -f alsa -ar 16000 -ac 2 -i hw:1,0 -map 0:0 -map 1:0 -c:v copy -strict -2 -c:a aac -b:a 16k -ac 1 -af "pan=1c|c0=c1" -f rtsp -metadata title=bbPiCam rtsp://0.0.0.0:554
+
+#exec ffmpeg -fflags +nobuffer -re -i $FIFO -fflags +nobuffer -re -f s16le -ar 16000 -ac 2 -i /dev/null -map 0:0 -map 1:0 -c:v copy -strict -2 -c:a aac -b:a 16k -ac 1 -af "pan=1c|c0=c1" -f rtsp -metadata title=bbPiCam -metadata streamName=bbPiCam rtsp://0.0.0.0:554
+
+exec ffmpeg -y \
+     -re -fflags +nobuffer -i $FIFO -fflags +nobuffer \
+     -re -f s16le -r:a 48000 -ac 2 -i /dev/null \
+     -map 0:0 -map 1:0 \
+     -c:v copy -strict -2 \
+     -c:a libfaac -b:a 128k \
+     -f segment \
+     -segment_time 5 \
+     -segment_format mpegts \
+     -segment_list "/usr/share/nginx/www/live.m3u8" \
+     -segment_list_size 2 \
+     -segment_wrap 2 \
+     -segment_list_entry_prefix "live/" \
+     -segment_list_flags live \
+     -segment_list_type m3u8 "live/%08d.ts"
