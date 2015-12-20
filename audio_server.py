@@ -31,7 +31,7 @@ def process_audio(shared_audio, shared_time, shared_pos, lock):
 
     # open default audio input stream
     p = pyaudio.PyAudio()
-    stream = p.open(format=AUDIO_FORMAT, channels=1, rate=SAMPLE_RATE, input=True, frames_per_buffer=CHUNK_SIZE)
+    stream = p.open(format=AUDIO_FORMAT, channels=1, rate=SAMPLE_RATE, input=True, frames_per_buffer=CHUNK_SIZE, input_device_index=3)
 
     while True:
         # grab audio and timestamp
@@ -46,7 +46,9 @@ def process_audio(shared_audio, shared_time, shared_pos, lock):
 
         # record the maximum volume in this time slice
         shared_audio[shared_pos.value] = np.abs(audio).max()
-
+        #print "cur val"
+        #print shared_audio[shared_pos.value]
+        
         # increment counter
         shared_pos.value = (shared_pos.value + 1) % len(shared_time)
 

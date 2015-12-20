@@ -40,7 +40,7 @@ def broadcast_mic_data(audio_server, upper_limit, noise_threshold, min_quiet_tim
     conn.send(parameters)
     results = conn.recv()
     conn.close()
-
+    # print results
     # send results to all clients
     now = datetime.now()
     results['date_current'] = '{dt:%A} {dt:%B} {dt.day}, {dt.year}'.format(dt=now)
