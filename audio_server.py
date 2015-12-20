@@ -167,8 +167,8 @@ def process_requests(listen_on, shared_audio, shared_time, shared_pos, lock):
         time_current = time.time()
         time_crying = ""
         time_quiet = ""
-        str_crying = "Baby noise for "
-        str_quiet = "Baby quiet for "
+        str_crying = "Finn macht Krach seit "
+        str_quiet = "Finn ist still seit "
         if len(crying_blocks) == 0:
             time_quiet = str_quiet + format_time_difference(time_stamps[0], time_current)
         else:

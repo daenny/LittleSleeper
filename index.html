@@ -2,19 +2,17 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>LittleSleeper</title>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-        <link rel="stylesheet" href={{ static_url("custom.css") }}>
-
-
+        <title>FinnCam</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+	<link rel="stylesheet" href={{ static_url("custom.css") }}>
     </head>
     <body>
     <div class="container">
         <div class="header">
-            <h3 class="text-muted">LittleSleeper</h3>
+            <h3 class="text-muted">FinnCam</h3>
         </div>
-	<div class="jumbotron">
-	  <img src="http://192.168.1.50:8081" >
+	<div class="jumbotron" id="motion-image">
+	  <img id="motion_image" />
 	</div>
         <!-- current status -->
         <div class="jumbotron">
@@ -36,7 +34,9 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
     <script language="javascript" type="text/javascript" src={{ static_url("jquery.flot.js") }}></script>
     <script type="text/javascript">
-    $(function() {
+      $(function() {
+      document.getElementById("motion_image").src =
+      "http://" + window.location.hostname + ":8081" ;
         var zeros = []
         for (var i = 0; i < 3600; i++) { zeros.push([i, 0.0]); }
         var plot = $.plot("#plot", [ zeros ], {
@@ -68,7 +68,7 @@
             $("#time_crying").text(JSON.parse(message.data).time_crying);
 
             // update the history table
-            var table = "<tr><th>Baby noise start</th><th>Duration</th></tr>";
+            var table = "<tr><th>Finn hat Krach gemacht um</th><th>Dauer</th></tr>";
             $.each(JSON.parse(message.data).crying_blocks, function( index, crying_block ) {
                table += "<tr><td>" + crying_block.start_str + "</td><td>" + crying_block.duration + "</td></tr>";
             });
