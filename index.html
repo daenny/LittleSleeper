@@ -11,12 +11,17 @@
         <div class="header">
           <h3 class="text-muted">FinnCam</h3>
           
-          <fieldset style="width: 220px;">
-            <legend>IRLed control panel</legend>
-            <button onclick=sendCmd("/ledon")>An</button>
-            <button onclick=sendCmd("/ledoff")>Aus</button>
+          <fieldset style="width: 420px;">
+            <legend>Licht control panel</legend>
+            <button onclick=sendCmd("/irledon")>IR An</button>
+            <button onclick=sendCmd("/irledoff")>IR Aus</button>
+            <span>&nbsp;&nbsp;</span>
+            <button onclick=sendCmd("/ledon")>LED An</button>
+            <button onclick=sendCmd("/ledoff")>LED Aus</button>
           </fieldset>
-          <label>IR status: </label><span id="state_line"/></span>
+          <br />
+          <label>IR status: </label><span id="state_line_ir"/></span>
+          <label>LED status: </label><span id="state_line_normal"/></span>
         </div>
 	<div class="jumbotron" id="motion-image">
 	  <img id="motion_image" />
@@ -86,7 +91,8 @@
 
         socket.onmessage = function (message) {
             // update the text display
-                            $("#state_line").text(JSON.parse(message.data).led_status);
+                            $("#state_line_ir").text(JSON.parse(message.data).irled_status);
+                            $("#state_line_normal").text(JSON.parse(message.data).led_status);
                             $("#time_quiet").text(JSON.parse(message.data).time_quiet);
                             $("#time_crying").text(JSON.parse(message.data).time_crying);
             

@@ -15,6 +15,8 @@ import tornado.websocket
 import RPi.GPIO as GPIO
 
 # Variables
+IRLED_PIN = 14
+IRLED_STATUS = False
 LED_PIN = 4
 LED_STATUS = False
 
@@ -23,20 +25,37 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(LED_PIN, GPIO.OUT)
 GPIO.output(LED_PIN, False)
 
+GPIO.setup(IRLED_PIN, GPIO.OUT)
+GPIO.output(IRLED_PIN, False)
+
+
 parser = argparse.ArgumentParser(description='Listens from the microphone, records the maximum volume and serves it to the web server process.')
 parser.add_argument('--config', default='default.conf', dest='config_file', help='Configuration file', type=str)
 
 class IRLedsOn(tornado.web.RequestHandler):
     def get(self):
+        global IRLED_STATUS
+        GPIO.output(IRLED_PIN, True)
+        IRLED_STATUS=True
+
+class IRLedsOff(tornado.web.RequestHandler):
+    def get(self):
+        global IRLED_STATUS
+        GPIO.output(IRLED_PIN, False)
+        IRLED_STATUS=False
+
+class LedOn(tornado.web.RequestHandler):
+    def get(self):
         global LED_STATUS
         GPIO.output(LED_PIN, True)
         LED_STATUS=True
 
-class IRLedsOff(tornado.web.RequestHandler):
+class LedOff(tornado.web.RequestHandler):
     def get(self):
         global LED_STATUS
         GPIO.output(LED_PIN, False)
         LED_STATUS=False
+
 
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
@@ -74,6 +93,11 @@ def broadcast_mic_data(audio_server, upper_limit, noise_threshold, min_quiet_tim
         results['led_status'] = " An"
     else:
         results['led_status'] = " Aus"
+    if IRLED_STATUS:
+        results['irled_status'] = " An"
+    else:
+        results['irled_status'] = " Aus"
+
     for c in clients:
         c.write_message(results)
 
@@ -86,8 +110,10 @@ def main(audio_server, listen_on, upper_limit, noise_threshold, min_quiet_time, 
         handlers=[
             (r"/", IndexHandler),
             (r"/ws", WebSocketHandler),
-            (r"/ledon", IRLedsOn),
-            (r"/ledoff", IRLedsOff),
+            (r"/ledon", LedOn),
+            (r"/ledoff", LedOff),
+            (r"/irledon", IRLedsOn),
+            (r"/irledoff", IRLedsOff),
         ], **settings
     )
     http_server = tornado.httpserver.HTTPServer(app)

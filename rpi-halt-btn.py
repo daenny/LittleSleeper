@@ -3,7 +3,7 @@ import RPi.GPIO as GPIO
 import subprocess, time
 
 # setup the GPIO pins for the halt switch
-HALT_SWITCH_GPIO_PIN = 24
+HALT_SWITCH_GPIO_PIN = 25
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(HALT_SWITCH_GPIO_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -18,4 +18,4 @@ except KeyboardInterrupt:
 	print "Stopped by user"
 	GPIO.cleanup()
 print "FinnCam: Shutdown switch pressed - halting system."
-subprocess.call(["poweroff"])
+subprocess.call(["halt"])
