@@ -10,9 +10,33 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 
+##LED Light
+# import required libraries
+import RPi.GPIO as GPIO
+
+# Variables
+LED_PIN = 4
+LED_STATUS = False
+
+# setmodes
+GPIO.setmode(GPIO.BCM)
+GPIO.setmode(LED_PIN, GPIO.OUT)
+GPIO.output(LED_PIN, False)
+
 parser = argparse.ArgumentParser(description='Listens from the microphone, records the maximum volume and serves it to the web server process.')
 parser.add_argument('--config', default='default.conf', dest='config_file', help='Configuration file', type=str)
 
+class IRLedsOn(tornado.web.RequestHandler):
+    def get(self):
+        global LED_STATUS
+        GPIO.output(LED_PIN, True)
+        LED_STATUS=True
+
+class IRLedsOff(tornado.web.RequestHandler):
+    def get(self):
+        global LED_STATUS
+        GPIO.output(LED_PIN, False)
+        LED_STATUS=False
 
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
@@ -46,6 +70,10 @@ def broadcast_mic_data(audio_server, upper_limit, noise_threshold, min_quiet_tim
     results['date_current'] = '{dt:%A} {dt:%B} {dt.day}, {dt.year}'.format(dt=now)
     results['time_current'] = now.strftime("%I:%M:%S %p").lstrip('0')
     results['audio_plot'] = results['audio_plot'].tolist()
+    if LED_STATUS:
+        results['led_status'] = "An"
+    else:
+        results['led_status'] = "Aus"
     for c in clients:
         c.write_message(results)
 
@@ -58,6 +86,8 @@ def main(audio_server, listen_on, upper_limit, noise_threshold, min_quiet_time, 
         handlers=[
             (r"/", IndexHandler),
             (r"/ws", WebSocketHandler),
+            (r"/ledon", IRLedsOn),
+            (r"/ledoff", IRLedsOff),
         ], **settings
     )
     http_server = tornado.httpserver.HTTPServer(app)
