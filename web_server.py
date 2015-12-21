@@ -20,7 +20,7 @@ LED_STATUS = False
 
 # setmodes
 GPIO.setmode(GPIO.BCM)
-GPIO.setmode(LED_PIN, GPIO.OUT)
+GPIO.setup(LED_PIN, GPIO.OUT)
 GPIO.output(LED_PIN, False)
 
 parser = argparse.ArgumentParser(description='Listens from the microphone, records the maximum volume and serves it to the web server process.')
@@ -71,9 +71,9 @@ def broadcast_mic_data(audio_server, upper_limit, noise_threshold, min_quiet_tim
     results['time_current'] = now.strftime("%I:%M:%S %p").lstrip('0')
     results['audio_plot'] = results['audio_plot'].tolist()
     if LED_STATUS:
-        results['led_status'] = "An"
+        results['led_status'] = " An"
     else:
-        results['led_status'] = "Aus"
+        results['led_status'] = " Aus"
     for c in clients:
         c.write_message(results)
 
