@@ -98,19 +98,26 @@ def main(audio_server, listen_on, upper_limit, noise_threshold, min_quiet_time, 
     scheduler = tornado.ioloop.PeriodicCallback(lambda: broadcast_mic_data(audio_server, upper_limit, noise_threshold, min_quiet_time, min_noise_time), 1000, io_loop=main_loop)
     scheduler.start()
     main_loop.start()
- 
+    
 if __name__ == '__main__':
     args = parser.parse_args()
     config = ConfigParser.SafeConfigParser()
     config_status = config.read(args.config_file)
     if not config_status:
         raise IOError("Configuration file '%s' not found." % (args.config_file,))
-    main(
-        (config.get('web_server', 'audio_server_host'), int(config.get('web_server', 'audio_server_port')),),
-        (config.get('web_server', 'host'), int(config.get('web_server', 'port')),),
-        int(config.get('web_server', 'upper_limit')),
-        float(config.get('web_server', 'noise_threshold')),
-        int(config.get('web_server', 'min_quiet_time')),
-        int(config.get('web_server', 'min_noise_time')),
-    )
+
+    try:
+        main(
+            (config.get('web_server', 'audio_server_host'), int(config.get('web_server', 'audio_server_port')),),
+            (config.get('web_server', 'host'), int(config.get('web_server', 'port')),),
+            int(config.get('web_server', 'upper_limit')),
+            float(config.get('web_server', 'noise_threshold')),
+            int(config.get('web_server', 'min_quiet_time')),
+            int(config.get('web_server', 'min_noise_time')),
+        )
+    except KeyboardInterrupt:
+	print "Stopped by user"
+	GPIO.cleanup()
+
+        
 

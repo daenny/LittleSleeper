@@ -46,8 +46,8 @@ def process_audio(shared_audio, shared_time, shared_pos, lock):
 
         # record the maximum volume in this time slice
         shared_audio[shared_pos.value] = np.abs(audio).max()
-        #print "cur val"
-        #print shared_audio[shared_pos.value]
+        print "cur val"
+        print shared_audio[shared_pos.value]
         
         # increment counter
         shared_pos.value = (shared_pos.value + 1) % len(shared_time)
