@@ -34,26 +34,33 @@ def process_audio(shared_audio, shared_time, shared_pos, lock):
     stream = p.open(format=AUDIO_FORMAT, channels=1, rate=SAMPLE_RATE, input=True, frames_per_buffer=CHUNK_SIZE, input_device_index=3)
 
     while True:
-        # grab audio and timestamp
-        audio = np.fromstring(stream.read(CHUNK_SIZE), np.int16)
-        current_time = time.time()
+        try:
+            # grab audio and timestamp
+            audio = np.fromstring(stream.read(CHUNK_SIZE), np.int16)
+            current_time = time.time()
 
-        # acquire lock
-        lock.acquire()
+            # acquire lock
+            lock.acquire()
 
-        # record current time
-        shared_time[shared_pos.value] = current_time
+            # record current time
+            shared_time[shared_pos.value] = current_time
 
-        # record the maximum volume in this time slice
-        shared_audio[shared_pos.value] = np.abs(audio).max()
-        print "cur val"
-        print shared_audio[shared_pos.value]
+            # record the maximum volume in this time slice
+            shared_audio[shared_pos.value] = np.abs(audio).max()
+            #print "cur val"
+            #print shared_audio[shared_pos.value]
         
-        # increment counter
-        shared_pos.value = (shared_pos.value + 1) % len(shared_time)
-
-        # release lock
-        lock.release()
+            # increment counter
+            shared_pos.value = (shared_pos.value + 1) % len(shared_time)
+            
+            # release lock
+            lock.release()
+        except Exception as e:
+            print e
+            time.sleep(0.1)
+            stream.stop_stream()
+            stream.close()
+            stream = p.open(format=AUDIO_FORMAT, channels=1, rate=SAMPLE_RATE, input=True, frames_per_buffer=CHUNK_SIZE, input_device_index=3)
 
     # I've included the following code for completion, but unless the above
     #  loop is modified to include an interrupt it will never be executed
@@ -104,6 +111,8 @@ def process_requests(listen_on, shared_audio, shared_time, shared_pos, lock):
         time_stamps = np.roll(time_stamps, shift=buffer_len-current_pos)
         audio_signal = np.roll(audio_signal, shift=buffer_len-current_pos)
 
+        cur_value = audio_signal[-1]
+        
         # normalise volume level
         audio_signal /= parameters['upper_limit']
 
@@ -181,7 +190,8 @@ def process_requests(listen_on, shared_audio, shared_time, shared_pos, lock):
         results = {'audio_plot': audio_plot,
                    'crying_blocks': crying_blocks,
                    'time_crying': time_crying,
-                   'time_quiet': time_quiet}
+                   'time_quiet': time_quiet,
+                   'cur_value': cur_value}
         conn.send(results)
         conn.close()
 

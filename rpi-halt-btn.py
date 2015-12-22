@@ -17,7 +17,7 @@ while True:
         try:
                 GPIO.wait_for_edge(HALT_SWITCH_GPIO_PIN, GPIO.FALLING)
                 print "FinnCam: Shutdown switch pressed - halting system."
-                subprocess.call(["halt"])
+                subprocess.call(["sudo", "halt"])
         except KeyboardInterrupt:
                 print "Stopped by user"
                 GPIO.cleanup()

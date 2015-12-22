@@ -20,6 +20,9 @@ IRLED_STATUS = False
 LED_PIN = 4
 LED_STATUS = False
 
+SERVO_PIN = 18
+SERVO_STATUS = False
+
 # setmodes
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(LED_PIN, GPIO.OUT)
@@ -28,6 +31,8 @@ GPIO.output(LED_PIN, False)
 GPIO.setup(IRLED_PIN, GPIO.OUT)
 GPIO.output(IRLED_PIN, False)
 
+GPIO.setup(SERVO_PIN, GPIO.OUT)
+pwm = GPIO.PWM(SERVO_PIN, 50)
 
 parser = argparse.ArgumentParser(description='Listens from the microphone, records the maximum volume and serves it to the web server process.')
 parser.add_argument('--config', default='default.conf', dest='config_file', help='Configuration file', type=str)
@@ -56,6 +61,18 @@ class LedOff(tornado.web.RequestHandler):
         GPIO.output(LED_PIN, False)
         LED_STATUS=False
 
+class ServoOn(tornado.web.RequestHandler):
+    def get(self):
+        global SERVO_STATUS
+        pwm.start(30)
+        pwm.ChangeDutyCycle(30)
+        SERVO_STATUS = True
+        
+class ServoOff(tornado.web.RequestHandler):
+    def get(self):
+        global SERVO_STATUS
+        pwm.ChangeDutyCycle()
+        SERVO_STATUS = False
 
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
@@ -89,6 +106,7 @@ def broadcast_mic_data(audio_server, upper_limit, noise_threshold, min_quiet_tim
     results['date_current'] = '{dt:%A} {dt:%B} {dt.day}, {dt.year}'.format(dt=now)
     results['time_current'] = now.strftime("%I:%M:%S %p").lstrip('0')
     results['audio_plot'] = results['audio_plot'].tolist()
+    results['cur_value'] = str(results['cur_value'])
     if LED_STATUS:
         results['led_status'] = " An"
     else:
@@ -97,6 +115,11 @@ def broadcast_mic_data(audio_server, upper_limit, noise_threshold, min_quiet_tim
         results['irled_status'] = " An"
     else:
         results['irled_status'] = " Aus"
+
+    if SERVO_STATUS:
+        results['servo_status'] = " An"
+    else:
+        results['servo_status'] = " Aus"
 
     for c in clients:
         c.write_message(results)
@@ -114,6 +137,8 @@ def main(audio_server, listen_on, upper_limit, noise_threshold, min_quiet_time, 
             (r"/ledoff", LedOff),
             (r"/irledon", IRLedsOn),
             (r"/irledoff", IRLedsOff),
+            (r"/servoon", ServoOn),
+            (r"/servooff", ServoOff),
         ], **settings
     )
     http_server = tornado.httpserver.HTTPServer(app)
