@@ -12,15 +12,23 @@
           <h3 class="text-muted">FinnCam</h3>
           
           <fieldset style="width: 100%;">
-            <legend>Control panel</legend>
+            <legend>Licht Control panel</legend>
             <button onclick=sendCmd("/irledon")>IR An</button>
             <button onclick=sendCmd("/irledoff")>IR Aus</button>
             <span>&nbsp;&nbsp;</span>
             <button onclick=sendCmd("/ledon")>LED An</button>
             <button onclick=sendCmd("/ledoff")>LED Aus</button>
-            <span>&nbsp;&nbsp;</span>
-            <button onclick=sendCmd("/servoon")>Drehen An</button>
-            <button onclick=sendCmd("/servooff")>Drehen Aus</button>
+          </fieldset>
+          <br />
+          <label>IR status: </label><span id="state_line_ir"/></span>
+          <label>LED status: </label><span id="state_line_normal"/></span>
+          <fieldset style="width: 100%;">
+            <legend>Drehen Control panel</legend>
+            <button onclick=sendCmd("/servoplusccw")>+CCW</button>
+            <button onclick=sendCmd("/servoccw")>CCW</button>
+            <button onclick=sendCmd("/servooff")>Aus</button>
+            <button onclick=sendCmd("/servocw")>CW</button>
+            <button onclick=sendCmd("/servopluscw")>+CW</button>
           </fieldset>
           <br />
           <label>IR status: </label><span id="state_line_ir"/></span>

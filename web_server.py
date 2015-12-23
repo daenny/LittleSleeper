@@ -22,8 +22,14 @@ LED_STATUS = False
 
 #SERVO_PIN = 18
 SERVO_NR = 0
-SERVO_ZERO = 1435
+SERVO_ZERO = 1445
 
+SERVO_MIN = SERVO_ZERO - 300
+SERVO_MAX =  SERVO_SERVO + 300
+
+NORMAL_SPEED = 105
+
+SERVO_STEP = 15
 SERVO_STATUS = 1435
 
 # setmodes
@@ -73,18 +79,27 @@ class LedOff(tornado.web.RequestHandler):
         GPIO.output(LED_PIN, False)
         LED_STATUS=False
 
-class ServoOn(tornado.web.RequestHandler):
+class ServoCW(tornado.web.RequestHandler):
     def get(self):
-        global SERVO_STATUS
-        pwm.start(30)
-        pwm.ChangeDutyCycle(30)
-        SERVO_STATUS = True
-        
+        setServo(SERVO_ZERO - NORMAL_SPEED)
+
+class ServoCCW(tornado.web.RequestHandler):
+    def get(self):
+        setServo(SERVO_ZERO + NORMAL_SPEED)
+
+class ServoPlusCW(tornado.web.RequestHandler):
+    def get(self):
+        if SERVO_STATUS - SERVO_STEP > SERVO_MIN:
+            setServo(SERVO_ZERO - SERVO_STEP)
+
+class ServoPlusCCW(tornado.web.RequestHandler):
+    def get(self):
+        if SERVO_STATUS + SERVO_STEP < SERVO_MAX:
+            setServo(SERVO_ZERO + SERVO_STEP)
+
 class ServoOff(tornado.web.RequestHandler):
     def get(self):
-        global SERVO_STATUS
-        pwm.ChangeDutyCycle()
-        SERVO_STATUS = False
+        setServo(SERVO_ZERO)
 
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
@@ -128,11 +143,13 @@ def broadcast_mic_data(audio_server, upper_limit, noise_threshold, min_quiet_tim
     else:
         results['irled_status'] = " Aus"
 
-    if SERVO_STATUS:
-        results['servo_status'] = " An"
-    else:
+    servo_steps = (SERVO_STATUS - SERVO_ZERO)/(SERVO_MAX - SERVO_ZERO)
+    if SERVO_STATUS == SERVO_ZERO:
         results['servo_status'] = " Aus"
-
+    elif SERVO_STATUS < SERVO_ZERO:
+        results['servo_status'] = " CCW %u \%"%(int(abs(servo_steps*100)))
+    else:
+        results['servo_status'] = " CW %u \%"%(int(abs(servo_steps*100)))
     for c in clients:
         c.write_message(results)
 
@@ -149,7 +166,10 @@ def main(audio_server, listen_on, upper_limit, noise_threshold, min_quiet_time, 
             (r"/ledoff", LedOff),
             (r"/irledon", IRLedsOn),
             (r"/irledoff", IRLedsOff),
-            (r"/servoon", ServoOn),
+            (r"/servoccw", ServoCCW),
+            (r"/servocw", ServoCW),
+            (r"/servoplusccw", ServoPlusCCW),
+            (r"/servopluscw", ServoPlusCW),
             (r"/servooff", ServoOff),
         ], **settings
     )
