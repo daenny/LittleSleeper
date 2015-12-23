@@ -58,8 +58,6 @@ def process_audio(shared_audio, shared_time, shared_pos, lock):
         except Exception as e:
             print e
             time.sleep(0.1)
-            stream.stop_stream()
-            stream.close()
             stream = p.open(format=AUDIO_FORMAT, channels=1, rate=SAMPLE_RATE, input=True, frames_per_buffer=CHUNK_SIZE, input_device_index=3)
 
     # I've included the following code for completion, but unless the above

@@ -20,8 +20,11 @@ IRLED_STATUS = False
 LED_PIN = 4
 LED_STATUS = False
 
-SERVO_PIN = 18
-SERVO_STATUS = False
+#SERVO_PIN = 18
+SERVO_NR = 0
+SERVO_ZERO = 1435
+
+SERVO_STATUS = 1435
 
 # setmodes
 GPIO.setmode(GPIO.BCM)
@@ -31,8 +34,17 @@ GPIO.output(LED_PIN, False)
 GPIO.setup(IRLED_PIN, GPIO.OUT)
 GPIO.output(IRLED_PIN, False)
 
-GPIO.setup(SERVO_PIN, GPIO.OUT)
-pwm = GPIO.PWM(SERVO_PIN, 50)
+#GPIO.setup(SERVO_PIN, GPIO.OUT)
+#pwm = GPIO.PWM(SERVO_PIN, 50)
+
+def setServo(position):
+    global SERVO_STATUS
+    servoStr ="%u=%uus\n" % (SERVO_NR, position)
+    with open("/dev/servoblaster", "wb") as f:
+        f.write(servoStr)
+    SERVO_STATUS = position
+    
+setServo(SERVO_ZERO)
 
 parser = argparse.ArgumentParser(description='Listens from the microphone, records the maximum volume and serves it to the web server process.')
 parser.add_argument('--config', default='default.conf', dest='config_file', help='Configuration file', type=str)
