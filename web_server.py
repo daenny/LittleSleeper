@@ -50,7 +50,7 @@ def setServo(position):
         f.write(servoStr)
     SERVO_STATUS = position
     
-setServo(SERVO_ZERO)
+setServo(0)
 
 parser = argparse.ArgumentParser(description='Listens from the microphone, records the maximum volume and serves it to the web server process.')
 parser.add_argument('--config', default='default.conf', dest='config_file', help='Configuration file', type=str)
@@ -99,7 +99,8 @@ class ServoPlusCCW(tornado.web.RequestHandler):
 
 class ServoOff(tornado.web.RequestHandler):
     def get(self):
-        setServo(SERVO_ZERO)
+        #setServo(SERVO_ZERO)
+        setServo(0)
 
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
