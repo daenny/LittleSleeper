@@ -17,5 +17,5 @@ GWIP=$(/sbin/ip route | awk '/default/ { print $3 }')
 sed 's/localip \(.*\)/localip '"$IP"'/g' /etc/pptpd.conf -i
 sed 's/remoteip \(.*\)/remoteip '"$IP_PREF"'234-238/g' /etc/pptpd.conf -i
 
-sed 's/ms-dns 1\(.*\)/md-dns '"$GWIP"'/g' /etc/ppp/pptpd-options -i
+sed 's/ms-dns 1\(.*\)/ms-dns '"$GWIP"'/g' /etc/ppp/pptpd-options -i
 # upnpc -a $IP 1723 1723 TCP
