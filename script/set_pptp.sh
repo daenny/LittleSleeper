@@ -1,16 +1,13 @@
-#!/bin/env sh
-while true; do
-    # testing...
-    LC_ALL=C nmcli -t -f DEVICE,STATE dev | grep -q "^wlan0:connected$"
-    if [ $? -eq 0 ]; then
-	break
-    else
-	# not connected, sleeping for a second
-	sleep 1
-    fi
+#!/bin/env bash
+STATE=1;
+
+while [ $STATE == 1 ]; do
+    #do a ping and check that its not a default message or change to grep for something else
+    STATE=$(ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo 0 || echo 1)
+
+    #sleep for 2 seconds and try again
+    sleep 2
 done
-
-
 
 IP=$(ifconfig wlan0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')
 IP_PREF=$(echo $IP | grep -Eo '([0-9]{1,3}\.){3}')
