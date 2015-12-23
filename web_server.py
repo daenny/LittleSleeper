@@ -22,10 +22,10 @@ LED_STATUS = False
 
 #SERVO_PIN = 18
 SERVO_NR = 0
-SERVO_ZERO = 1445
+SERVO_ZERO = 1435
 
 SERVO_MIN = SERVO_ZERO - 300
-SERVO_MAX =  SERVO_SERVO + 300
+SERVO_MAX =  SERVO_ZERO + 300
 
 NORMAL_SPEED = 105
 
@@ -89,13 +89,13 @@ class ServoCCW(tornado.web.RequestHandler):
 
 class ServoPlusCW(tornado.web.RequestHandler):
     def get(self):
-        if SERVO_STATUS - SERVO_STEP > SERVO_MIN:
-            setServo(SERVO_ZERO - SERVO_STEP)
+        if SERVO_STATUS - SERVO_STEP >= SERVO_MIN:
+            setServo(SERVO_STATUS - SERVO_STEP)
 
 class ServoPlusCCW(tornado.web.RequestHandler):
     def get(self):
-        if SERVO_STATUS + SERVO_STEP < SERVO_MAX:
-            setServo(SERVO_ZERO + SERVO_STEP)
+        if SERVO_STATUS + SERVO_STEP <= SERVO_MAX:
+            setServo(SERVO_STATUS + SERVO_STEP)
 
 class ServoOff(tornado.web.RequestHandler):
     def get(self):
@@ -143,13 +143,13 @@ def broadcast_mic_data(audio_server, upper_limit, noise_threshold, min_quiet_tim
     else:
         results['irled_status'] = " Aus"
 
-    servo_steps = (SERVO_STATUS - SERVO_ZERO)/(SERVO_MAX - SERVO_ZERO)
+    servo_steps = (SERVO_STATUS - SERVO_ZERO)/float(SERVO_MAX - SERVO_ZERO)
     if SERVO_STATUS == SERVO_ZERO:
         results['servo_status'] = " Aus"
     elif SERVO_STATUS < SERVO_ZERO:
-        results['servo_status'] = " CCW %u \%"%(int(abs(servo_steps*100)))
+        results['servo_status'] = " CW %u %%"%(int(abs(servo_steps*100)))
     else:
-        results['servo_status'] = " CW %u \%"%(int(abs(servo_steps*100)))
+        results['servo_status'] = " CCW %u %%"%(int(abs(servo_steps*100)))
     for c in clients:
         c.write_message(results)
 
