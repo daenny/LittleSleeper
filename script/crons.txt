@@ -1,0 +1,6 @@
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
+@reboot sudo iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+10 * * * * upnpc -r 1723 TCP
+2,7,12,17,22,27,32,37,42,47,52,57 * * * * sleep 48 ; wget -O - http://freedns.a\
+fraid.org/dynamic/update.php?XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX >> /t\
+mp/freedns_babyclaes_us_to.log 2>&1 &
