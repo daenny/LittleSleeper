@@ -145,7 +145,7 @@ def broadcast_mic_data(audio_server, upper_limit, noise_threshold, min_quiet_tim
         results['irled_status'] = " Aus"
 
     servo_steps = (SERVO_STATUS - SERVO_ZERO)/float(SERVO_MAX - SERVO_ZERO)
-    if SERVO_STATUS == SERVO_ZERO:
+    if SERVO_STATUS == 0:
         results['servo_status'] = " Aus"
     elif SERVO_STATUS < SERVO_ZERO:
         results['servo_status'] = " CW %u %%"%(int(abs(servo_steps*100)))
