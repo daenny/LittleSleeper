@@ -3,7 +3,7 @@ STATE=1;
 
 while [ $STATE == 1 ]; do
     #do a ping and check that its not a default message or change to grep for something else
-    STATE=$(ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo 0 || echo 1)
+    STATE=$(ping -q -w 1 -c 1 `ip r | grep default | head -1 | cut -d ' ' -f 3` > /dev/null && echo 0 || echo 1)
 
     #sleep for 2 seconds and try again
     sleep 2
