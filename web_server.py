@@ -12,7 +12,33 @@ import tornado.websocket
 
 ##LED Light
 # import required libraries
-import RPi.GPIO as GPIO
+RPI = False
+if RPI:
+    import RPi.GPIO as GPIO
+
+    def setServo(position):
+        global SERVO_STATUS
+        servoStr ="%u=%uus\n" % (SERVO_NR, position)
+        with open("/dev/servoblaster", "wb") as f:
+            f.write(servoStr)
+        SERVO_STATUS = position
+
+else:
+    class GPIO():
+        BCM = ""
+        OUT = ""
+        @staticmethod
+        def setmode(t):
+            pass
+        @staticmethod
+        def setup(t, p):
+            pass
+        @staticmethod
+        def output(t, p):
+            pass
+
+    def setServo(pos):
+        pass
 
 # Variables
 IRLED_PIN = 14
@@ -43,13 +69,6 @@ GPIO.output(IRLED_PIN, False)
 #GPIO.setup(SERVO_PIN, GPIO.OUT)
 #pwm = GPIO.PWM(SERVO_PIN, 50)
 
-def setServo(position):
-    global SERVO_STATUS
-    servoStr ="%u=%uus\n" % (SERVO_NR, position)
-    with open("/dev/servoblaster", "wb") as f:
-        f.write(servoStr)
-    SERVO_STATUS = position
-    
 setServo(0)
 
 parser = argparse.ArgumentParser(description='Listens from the microphone, records the maximum volume and serves it to the web server process.')

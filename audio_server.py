@@ -12,12 +12,12 @@ from scipy import interpolate, ndimage
 
 CHUNK_SIZE = 8192
 AUDIO_FORMAT = pyaudio.paInt16
-SAMPLE_RATE = 16000
+SAMPLE_RATE = 44100
 
 parser = argparse.ArgumentParser(description='Listens from the microphone, records the maximum volume and serves it to the web server process.')
 parser.add_argument('--config', default='default.conf', dest='config_file', help='Configuration file', type=str)
 
-
+INPUT_DEVICE = 3
 def process_audio(shared_audio, shared_time, shared_pos, lock):
     """
     Endless loop: Grab some audio from the mic and record the maximum
@@ -31,7 +31,9 @@ def process_audio(shared_audio, shared_time, shared_pos, lock):
 
     # open default audio input stream
     p = pyaudio.PyAudio()
-    stream = p.open(format=AUDIO_FORMAT, channels=1, rate=SAMPLE_RATE, input=True, frames_per_buffer=CHUNK_SIZE, input_device_index=3)
+    # for i in range(p.get_device_count()):
+    #     print p.get_device_info_by_index(i)
+    stream = p.open(format=AUDIO_FORMAT, channels=1, rate=SAMPLE_RATE, input=True, frames_per_buffer=CHUNK_SIZE, input_device_index=INPUT_DEVICE)
 
     while True:
         try:
@@ -58,7 +60,7 @@ def process_audio(shared_audio, shared_time, shared_pos, lock):
         except Exception as e:
             print e
             time.sleep(0.1)
-            stream = p.open(format=AUDIO_FORMAT, channels=1, rate=SAMPLE_RATE, input=True, frames_per_buffer=CHUNK_SIZE, input_device_index=3)
+            stream = p.open(format=AUDIO_FORMAT, channels=1, rate=SAMPLE_RATE, input=True, frames_per_buffer=CHUNK_SIZE, input_device_index=INPUT_DEVICE)
 
     # I've included the following code for completion, but unless the above
     #  loop is modified to include an interrupt it will never be executed
